@@ -18,6 +18,7 @@ package com.google.firebase.codelab.friendlychat;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
@@ -37,10 +38,15 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdLoader;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.doubleclick.PublisherAdView;
 import com.google.android.gms.appinvite.AppInviteInvitation;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.common.ConnectionResult;
@@ -57,7 +63,9 @@ import com.google.firebase.appindexing.builders.PersonBuilder;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.crash.FirebaseCrash;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
@@ -92,6 +100,8 @@ public class MainActivity extends AppCompatActivity implements
     private static final String MESSAGE_SENT_EVENT = "message_sent";
     private static final String MESSAGE_URL = "http://friendlychat.firebase.google.com/message/";
 
+    public static final int AD_REFRESH_DELAY = 5000;
+
     private String mUsername;
     private String mPhotoUrl;
     private SharedPreferences mSharedPreferences;
@@ -109,6 +119,8 @@ public class MainActivity extends AppCompatActivity implements
     private AdView mAdView;
     private FirebaseRemoteConfig mFirebaseRemoteConfig;
     private GoogleApiClient mGoogleApiClient;
+    private DynamicAdHelper mDynamicAdHelper;
+    private Handler DynamicAdHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -198,10 +210,15 @@ public class MainActivity extends AppCompatActivity implements
         mMessageRecyclerView.setLayoutManager(mLinearLayoutManager);
         mMessageRecyclerView.setAdapter(mFirebaseAdapter);
 
+        MobileAds.initialize(getApplicationContext(), getString(R.string.app_ad_unit_id));
+
         // Initialize and request AdMob ad.
         mAdView = (AdView) findViewById(R.id.adView);
-        AdRequest adRequest = new AdRequest.Builder().build();
-        mAdView.loadAd(adRequest);
+        refreshAd();
+
+        //AdRequest adRequest = new AdRequest.Builder().addKeyword("eat icecream").build();
+        //mAdView.loadAd(adRequest);
+
 
         // Initialize Firebase Measurement.
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
@@ -260,6 +277,39 @@ public class MainActivity extends AppCompatActivity implements
                 mFirebaseAnalytics.logEvent(MESSAGE_SENT_EVENT, null);
             }
         });
+
+        //DynamicAdHelper
+        mDynamicAdHelper = new DynamicAdHelper("Room1");
+        mFirebaseDatabaseReference.child(MESSAGES_CHILD).addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                FriendlyMessage message = dataSnapshot.getValue(FriendlyMessage.class);
+                mDynamicAdHelper.countText(message.getText());
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+        DynamicAdHandler = new Handler();
+
     }
 
     private Action getMessageViewAction(FriendlyMessage friendlyMessage) {
@@ -295,6 +345,10 @@ public class MainActivity extends AppCompatActivity implements
             mAdView.pause();
         }
         super.onPause();
+
+        if(DynamicAdHandler != null) {
+            DynamicAdHandler.removeCallbacksAndMessages(null);
+        }
     }
 
     @Override
@@ -303,6 +357,14 @@ public class MainActivity extends AppCompatActivity implements
         if (mAdView != null) {
             mAdView.resume();
         }
+
+        DynamicAdHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                refreshAd();
+                DynamicAdHandler.postDelayed(this, AD_REFRESH_DELAY);
+            }
+        });
     }
 
     @Override
@@ -340,6 +402,12 @@ public class MainActivity extends AppCompatActivity implements
                 return true;
             case R.id.fresh_config_menu:
                 fetchConfig();
+                return true;
+            case R.id.fresh_mob:
+                refreshAd();
+                return true;
+            case R.id.common_word:
+                Log.d(TAG, "Repeated Word: "+ mDynamicAdHelper.getMostRepeatedWord());
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -426,4 +494,11 @@ public class MainActivity extends AppCompatActivity implements
         Log.d(TAG, "onConnectionFailed:" + connectionResult);
     }
 
+    private void refreshAd(){
+        String mostRepeatedWord = mDynamicAdHelper.getMostRepeatedWord();
+        AdRequest adRequest = new AdRequest.Builder()
+                .addKeyword(mostRepeatedWord)
+                .build();
+        mAdView.loadAd(adRequest);
+    }
 }

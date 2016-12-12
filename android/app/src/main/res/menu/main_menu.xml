@@ -15,4 +15,12 @@
     <item
         android:id="@+id/crash_menu"
         android:title="@string/cause_crash"/>
+
+    <item
+        android:id="@+id/fresh_mob"
+        android:title="@string/fresh_mob"/>
+
+    <item
+        android:id="@+id/common_word"
+        android:title="@string/common_word"/>
 </menu>

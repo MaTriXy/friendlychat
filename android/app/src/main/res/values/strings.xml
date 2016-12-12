@@ -11,5 +11,12 @@
     <string name="sign_up">Sign Up</string>
     <string name="fresh_config">Fresh Config</string>
     <string name="cause_crash">Cause Crash</string>
+    <string name="fresh_mob">Refresh Mob</string>
+    <string name="common_word">Common Word</string>
+
+
     <string name="banner_ad_unit_id" translatable="false">ca-app-pub-3940256099942544/6300978111</string>
+    <string name="app_ad_unit_id" translatable="false">ca-app-pub-5907245092294201~8790073025</string>
+    <string name="banner_ad_unit_id_main_activity" translatable="false">ca-app-pub-5907245092294201/4220272623</string>
+    <string name="banner_ad_unit_id_room_activity" translatable="false">ca-app-pub-5907245092294201/1266806227</string>
 </resources>
