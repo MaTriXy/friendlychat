@@ -62,6 +62,7 @@ public class SplashActivity extends AppCompatActivity {
         // available. Eg: if an error occurred fetching values from the server.
         Map<String, Object> defaultConfigMap = new HashMap<>();
         defaultConfigMap.put("show_wizard", true);
+        defaultConfigMap.put("wizard_pages", 1);
 
         // Apply config settings and default values.
         mFirebaseRemoteConfig.setConfigSettings(firebaseRemoteConfigSettings);
