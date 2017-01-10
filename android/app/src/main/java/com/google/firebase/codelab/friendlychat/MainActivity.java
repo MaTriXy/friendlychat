@@ -141,6 +141,8 @@ public class MainActivity extends AppCompatActivity implements
         mFirebaseRemoteConfig.setConfigSettings(firebaseRemoteConfigSettings);
         mFirebaseRemoteConfig.setDefaults(defaultConfigMap);
 
+        // Fetch remote config.
+        fetchConfig();
 
         if (mFirebaseUser == null) {
             // Not signed in, launch the Sign In activity
@@ -151,8 +153,6 @@ public class MainActivity extends AppCompatActivity implements
             mUsername = mFirebaseUser.getDisplayName();
             mPhotoUrl = mFirebaseUser.getPhotoUrl().toString();
         }
-        // Fetch remote config.
-        fetchConfig();
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .enableAutoManage(this /* FragmentActivity */, this /* OnConnectionFailedListener */)
