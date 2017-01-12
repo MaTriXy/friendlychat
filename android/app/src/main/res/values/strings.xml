@@ -15,4 +15,7 @@
 
     <string name="spalsh">Splash Screen</string>
     <string name="facebook_app_id"  translatable="false">795391437280178</string>
+    <string name="create_room">Create</string>
+    <string name="insert_room_name">Please enter room name</string>
+    <string name="share_using">Share using</string>
 </resources>

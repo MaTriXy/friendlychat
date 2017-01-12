@@ -15,30 +15,28 @@
  */
 package com.google.firebase.codelab.friendlychat;
 
+import java.io.Serializable;
+
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class FriendlyMessage {
+public class Room implements Serializable{
 
     private String id;
     private String name;
-    private String photoUrl;
-    private String roomId;
-    private String text;
+    private String lastMessage;
     private long timestamp;
 
-    public FriendlyMessage() {}
-
-    public FriendlyMessage(String roomId,String text, String name, String photoUrl,long timestamp) {
-        this.text = text;
-        this.name = name;
-        this.roomId = roomId;
-        this.photoUrl = photoUrl;
-        this.timestamp = timestamp;
+    public Room() {
     }
 
+    public Room(String name, String lastMessage,long timestamp) {
+        this.name = name;
+        this.lastMessage = lastMessage;
+        this.timestamp = timestamp;
+    }
 
     public String getId() {
         return id;
@@ -56,28 +54,12 @@ public class FriendlyMessage {
         this.name = name;
     }
 
-    public String getPhotoUrl() {
-        return photoUrl;
+    public String getLastMessage() {
+        return lastMessage;
     }
 
-    public void setPhotoUrl(String photoUrl) {
-        this.photoUrl = photoUrl;
-    }
-
-    public String getRoomId() {
-        return roomId;
-    }
-
-    public void setRoomId(String roomId) {
-        this.roomId = roomId;
-    }
-
-    public String getText() {
-        return text;
-    }
-
-    public void setText(String text) {
-        this.text = text;
+    public void setLastMessage(String lastMessage) {
+        this.lastMessage = lastMessage;
     }
 
     public long getTimestamp() {
